@@ -1,0 +1,306 @@
+<!--
+    Журнал посещаемости, оправдательные документы, «Мои пропуски» и уведомления.
+    Стили берутся из App.xaml через DynamicResource: StaticResource из отдельного словаря их не видит.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:Attendance.Desktop.ViewModels"
+                    xmlns:local="clr-namespace:Attendance.Desktop">
+
+    <local:DateOnlyConverter x:Key="DateOnly" />
+    <local:EnumNameConverter x:Key="EnumName" />
+    <local:LocalTimeConverter x:Key="LocalTime" />
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+
+    <!-- Журнал посещаемости -->
+    <DataTemplate DataType="{x:Type vm:JournalViewModel}">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Журнал посещаемости" Style="{DynamicResource TitleText}" Margin="0,0,0,12" />
+
+            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                <TextBlock Text="Занятия с" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <DatePicker SelectedDate="{Binding From}" Width="190" AutomationProperties.Name="Начало периода" />
+                <TextBlock Text="по" VerticalAlignment="Center" Margin="8,0,8,0" />
+                <DatePicker SelectedDate="{Binding To}" Width="190" AutomationProperties.Name="Конец периода" />
+                <Button Content="Показать" Command="{Binding LoadCommand}" Style="{DynamicResource PrimaryButton}" Margin="16,0,0,0" />
+            </WrapPanel>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*" />
+                    <ColumnDefinition Width="6*" />
+                </Grid.ColumnDefinitions>
+
+                <DataGrid ItemsSource="{Binding Lessons}" SelectedItem="{Binding SelectedLesson}" AutomationProperties.Name="Занятия">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Дата" Binding="{Binding Date, StringFormat='dd.MM.yyyy, ddd'}" />
+                        <DataGridTextColumn Header="Пара" Binding="{Binding PairNumber}" />
+                        <DataGridTextColumn Header="Дисциплина" Binding="{Binding Subject.Name}" Width="*" />
+                        <DataGridTextColumn Header="Группа" Binding="{Binding Group.Name}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Border Grid.Column="1" Style="{DynamicResource FormPanel}">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top">
+                            <TextBlock Text="{Binding LessonTitle}" Style="{DynamicResource SectionTitle}" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding ReadOnlyReason}" Style="{DynamicResource MutedText}" Margin="0,4,0,0" />
+                        </StackPanel>
+
+                        <StackPanel DockPanel.Dock="Bottom">
+                            <TextBlock Text="{Binding ErrorMessage}" Style="{DynamicResource ErrorText}" />
+                            <TextBlock Text="{Binding Message}" Style="{DynamicResource MutedText}" Margin="0,8,0,0" />
+                            <Button Content="Сохранить отметки" Command="{Binding SaveCommand}" Style="{DynamicResource PrimaryButton}"
+                                    HorizontalAlignment="Left" Margin="0,12,0,0" />
+                        </StackPanel>
+
+                        <DataGrid ItemsSource="{Binding Rows}" Margin="0,12,0,0" AutomationProperties.Name="Ведомость">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Отсутствовал">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsAbsent, UpdateSourceTrigger=PropertyChanged}" Margin="0"
+                                                      HorizontalAlignment="Center" AutomationProperties.Name="{Binding Name}"
+                                                      IsEnabled="{Binding DataContext.CanEdit, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Студент" Binding="{Binding Name}" Width="*" />
+                                <DataGridTextColumn Header="Статус пропуска" Binding="{Binding Status, Converter={StaticResource EnumName}}" />
+                                <DataGridTemplateColumn Width="130">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Сменить статус" MinWidth="0" Padding="8,2" CommandParameter="{Binding}"
+                                                    Visibility="{Binding CanToggleStatus, Converter={StaticResource BoolToVisibility}}"
+                                                    Command="{Binding DataContext.ToggleStatusCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </DockPanel>
+    </DataTemplate>
+
+    <!-- Оправдательные документы -->
+    <DataTemplate DataType="{x:Type vm:ExcusesViewModel}">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Справки и оправдательные документы" Style="{DynamicResource TitleText}" Margin="0,0,0,12" />
+
+            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                <TextBlock Text="Статус" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <ComboBox ItemsSource="{x:Static vm:ExcusesViewModel.StatusFilters}" DisplayMemberPath="Name"
+                          SelectedItem="{Binding StatusFilter}" Width="160" AutomationProperties.Name="Фильтр по статусу" />
+            </WrapPanel>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="340" />
+                </Grid.ColumnDefinitions>
+
+                <DataGrid ItemsSource="{Binding Documents}" SelectedItem="{Binding Selected}" AutomationProperties.Name="Документы">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Студент" Binding="{Binding Student.FullName}" Width="*" />
+                        <DataGridTextColumn Header="Тип" Binding="{Binding Type, Converter={StaticResource EnumName}}" />
+                        <DataGridTextColumn Header="Номер" Binding="{Binding Number}" />
+                        <DataGridTextColumn Header="С" Binding="{Binding ValidFrom, StringFormat='dd.MM.yyyy'}" />
+                        <DataGridTextColumn Header="По" Binding="{Binding ValidTo, StringFormat='dd.MM.yyyy'}" />
+                        <DataGridTextColumn Header="Статус" Binding="{Binding Status, Converter={StaticResource EnumName}}" />
+                        <DataGridTextColumn Header="Проверил" Binding="{Binding ReviewedBy.FullName}" />
+                        <DataGridTextColumn Header="Комментарий" Binding="{Binding ReviewComment}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Border Grid.Column="1" Style="{DynamicResource FormPanel}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Text="{Binding ErrorMessage}" Style="{DynamicResource ErrorText}" Margin="0,0,0,8" />
+                            <TextBlock Text="{Binding Message}" Style="{DynamicResource MutedText}" Margin="0,0,0,8" />
+
+                            <!-- Регистрация: староста, администратор -->
+                            <StackPanel Visibility="{Binding CanRegister, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="Новый документ" Style="{DynamicResource SectionTitle}" />
+                                <TextBlock Text="Студент" Style="{DynamicResource FieldLabel}" />
+                                <ComboBox ItemsSource="{Binding Students}" DisplayMemberPath="FullName" SelectedValuePath="Id"
+                                          SelectedValue="{Binding Draft.StudentId}" AutomationProperties.Name="Студент" />
+                                <TextBlock Text="Тип документа" Style="{DynamicResource FieldLabel}" />
+                                <ComboBox ItemsSource="{x:Static vm:ExcusesViewModel.Types}" DisplayMemberPath="Name" SelectedValuePath="Value"
+                                          SelectedValue="{Binding Draft.Type}" AutomationProperties.Name="Тип документа" />
+                                <TextBlock Text="Номер" Style="{DynamicResource FieldLabel}" />
+                                <TextBox Text="{Binding Draft.Number}" AutomationProperties.Name="Номер документа" />
+                                <TextBlock Text="Дата выдачи" Style="{DynamicResource FieldLabel}" />
+                                <DatePicker SelectedDate="{Binding Draft.IssueDate, Converter={StaticResource DateOnly}}" AutomationProperties.Name="Дата выдачи" />
+                                <TextBlock Text="Действует с" Style="{DynamicResource FieldLabel}" />
+                                <DatePicker SelectedDate="{Binding Draft.ValidFrom, Converter={StaticResource DateOnly}}" AutomationProperties.Name="Действует с" />
+                                <TextBlock Text="по" Style="{DynamicResource FieldLabel}" />
+                                <DatePicker SelectedDate="{Binding Draft.ValidTo, Converter={StaticResource DateOnly}}" AutomationProperties.Name="Действует по" />
+                                <TextBlock Text="Диагнозы и медицинские сведения не вносятся." Style="{DynamicResource MutedText}" FontSize="12" Margin="0,6,0,0" />
+                                <Button Content="Зарегистрировать" Command="{Binding RegisterCommand}" Style="{DynamicResource PrimaryButton}"
+                                        HorizontalAlignment="Left" Margin="0,12,0,0" />
+                                <Button Content="Удалить выбранный (не проверенный)" Command="{Binding DeleteCommand}"
+                                        HorizontalAlignment="Left" Margin="0,8,0,0" />
+                            </StackPanel>
+
+                            <!-- Проверка: куратор, администратор -->
+                            <StackPanel Visibility="{Binding CanReview, Converter={StaticResource BoolToVisibility}}" Margin="0,16,0,0">
+                                <TextBlock Text="Проверка выбранного документа" Style="{DynamicResource SectionTitle}" />
+                                <TextBlock Text="После подтверждения пропуски студента за период действия документа станут уважительными."
+                                           Style="{DynamicResource MutedText}" FontSize="12" Margin="0,4,0,0" />
+                                <Button Content="Подтвердить" Command="{Binding ApproveCommand}" Style="{DynamicResource PrimaryButton}"
+                                        HorizontalAlignment="Left" Margin="0,12,0,0" />
+                                <TextBlock Text="Причина отклонения" Style="{DynamicResource FieldLabel}" Margin="0,16,0,4" />
+                                <TextBox Text="{Binding RejectComment, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" MinHeight="50"
+                                         AutomationProperties.Name="Причина отклонения" />
+                                <Button Content="Отклонить" Command="{Binding RejectCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </DockPanel>
+    </DataTemplate>
+
+    <!-- Мои пропуски (студент) -->
+    <DataTemplate DataType="{x:Type vm:MyAbsencesViewModel}">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Мои пропуски" Style="{DynamicResource TitleText}" />
+            <TextBlock DockPanel.Dock="Top" Text="{Binding Summary}" Style="{DynamicResource MutedText}" Margin="0,0,0,12" />
+            <DataGrid ItemsSource="{Binding Items}" AutomationProperties.Name="Мои пропуски">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Дата" Binding="{Binding Date, StringFormat='dd.MM.yyyy, ddd'}" />
+                    <DataGridTextColumn Header="Пара" Binding="{Binding PairNumber}" />
+                    <DataGridTextColumn Header="Дисциплина" Binding="{Binding Subject}" Width="*" />
+                    <DataGridTextColumn Header="Часы" Binding="{Binding Hours}" />
+                    <DataGridTextColumn Header="Статус" Binding="{Binding Status, Converter={StaticResource EnumName}}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </DataTemplate>
+
+    <!-- Уведомления -->
+    <DataTemplate DataType="{x:Type vm:NotificationsViewModel}">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Уведомления" Style="{DynamicResource TitleText}" Margin="0,0,0,12" />
+            <Button DockPanel.Dock="Bottom" Content="Отметить все прочитанными" Command="{Binding MarkAllReadCommand}"
+                    HorizontalAlignment="Left" Margin="0,12,0,0" />
+            <DataGrid ItemsSource="{Binding Items}" AutomationProperties.Name="Уведомления">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsRead}" Value="False">
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Дата" Binding="{Binding CreatedAt, Converter={StaticResource LocalTime}, ConverterParameter='dd.MM.yyyy HH:mm'}" />
+                    <DataGridTextColumn Header="Сообщение" Binding="{Binding Message}" Width="*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextWrapping" Value="Wrap" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridCheckBoxColumn Header="Прочитано" Binding="{Binding IsRead}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </DataTemplate>
+
+    <!-- Отчёты: сводка пропусков группы за период -->
+    <DataTemplate DataType="{x:Type vm:ReportsViewModel}">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Отчёт: пропуски группы за период" Style="{DynamicResource TitleText}" Margin="0,0,0,12" />
+
+            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                <TextBlock Text="Группа" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <ComboBox ItemsSource="{Binding Groups}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedGroup}"
+                          Width="140" AutomationProperties.Name="Группа" />
+                <TextBlock Text="с" VerticalAlignment="Center" Margin="16,0,8,0" />
+                <DatePicker SelectedDate="{Binding From}" Width="190" AutomationProperties.Name="Начало периода" />
+                <TextBlock Text="по" VerticalAlignment="Center" Margin="8,0,8,0" />
+                <DatePicker SelectedDate="{Binding To}" Width="190" AutomationProperties.Name="Конец периода" />
+                <Button Content="Сформировать" Command="{Binding BuildCommand}" Style="{DynamicResource PrimaryButton}" Margin="16,0,0,0" />
+                <Button Content="Выгрузить в Excel" Command="{Binding ExportCommand}" Margin="8,0,0,0" />
+            </WrapPanel>
+
+            <StackPanel DockPanel.Dock="Bottom">
+                <TextBlock Text="{Binding ErrorMessage}" Style="{DynamicResource ErrorText}" />
+                <TextBlock Text="{Binding Summary}" Style="{DynamicResource MutedText}" Margin="0,8,0,0" />
+            </StackPanel>
+
+            <DataGrid ItemsSource="{Binding Report.Rows}" AutomationProperties.Name="Сводка пропусков">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Студент" Binding="{Binding Student}" Width="*" />
+                    <DataGridTextColumn Header="Пропущено пар" Binding="{Binding Pairs}" />
+                    <DataGridTextColumn Header="Всего часов" Binding="{Binding TotalHours}" />
+                    <DataGridTextColumn Header="Уважительные, ч" Binding="{Binding ExcusedHours}" />
+                    <DataGridTextColumn Header="Неуважительные, ч" Binding="{Binding UnexcusedHours}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </DataTemplate>
+
+    <!-- Журнал аудита -->
+    <DataTemplate DataType="{x:Type vm:AuditViewModel}">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Журнал аудита" Style="{DynamicResource TitleText}" Margin="0,0,0,12" />
+
+            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                <TextBlock Text="С" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <DatePicker SelectedDate="{Binding From}" Width="190" AutomationProperties.Name="Начало периода" />
+                <TextBlock Text="по" VerticalAlignment="Center" Margin="8,0,8,0" />
+                <DatePicker SelectedDate="{Binding To}" Width="190" AutomationProperties.Name="Конец периода" />
+                <TextBlock Text="Таблица" VerticalAlignment="Center" Margin="16,0,8,0" />
+                <ComboBox ItemsSource="{x:Static vm:AuditViewModel.Tables}" DisplayMemberPath="Name" SelectedItem="{Binding Table}"
+                          Width="170" AutomationProperties.Name="Таблица" />
+                <Button Content="Показать" Command="{Binding LoadCommand}" Style="{DynamicResource PrimaryButton}" Margin="16,0,0,0" />
+            </WrapPanel>
+
+            <StackPanel DockPanel.Dock="Bottom">
+                <TextBlock Text="{Binding ErrorMessage}" Style="{DynamicResource ErrorText}" />
+                <TextBlock Text="{Binding Message}" Style="{DynamicResource MutedText}" Margin="0,8,0,0" />
+            </StackPanel>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
+
+                <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" AutomationProperties.Name="Записи журнала">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Время" Binding="{Binding ChangedAt, Converter={StaticResource LocalTime}, ConverterParameter='dd.MM.yyyy HH:mm:ss'}" />
+                        <DataGridTextColumn Header="Пользователь" Binding="{Binding User.Login, TargetNullValue='(вне приложения)'}" />
+                        <DataGridTextColumn Header="Операция" Binding="{Binding Action}" />
+                        <DataGridTextColumn Header="Таблица" Binding="{Binding TableName}" />
+                        <DataGridTextColumn Header="ID записи" Binding="{Binding RecordId}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Border Grid.Column="1" Style="{DynamicResource FormPanel}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Было" Style="{DynamicResource SectionTitle}" />
+                        <TextBox Grid.Row="1" Text="{Binding OldValues, Mode=OneWay}" IsReadOnly="True" FontFamily="Consolas" FontSize="12"
+                                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0,4,0,8"
+                                 AutomationProperties.Name="Значения до изменения" />
+                        <TextBlock Grid.Row="2" Text="Стало" Style="{DynamicResource SectionTitle}" />
+                        <TextBox Grid.Row="3" Text="{Binding NewValues, Mode=OneWay}" IsReadOnly="True" FontFamily="Consolas" FontSize="12"
+                                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0,4,0,0"
+                                 AutomationProperties.Name="Значения после изменения" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </DockPanel>
+    </DataTemplate>
+</ResourceDictionary>

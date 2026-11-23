@@ -1,0 +1,30 @@
+<Window x:Class="Attendance.Desktop.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        FontSize="14"
+        Title="Мониторинг прогулов учебной группы" Height="680" Width="1100" MinHeight="480" MinWidth="800"
+        WindowStartupLocation="CenterScreen">
+    <DockPanel>
+        <!-- Шапка -->
+        <Border DockPanel.Dock="Top" Background="{StaticResource AccentBrush}" Padding="16,10">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding UserInfo}" Foreground="White" VerticalAlignment="Center" Margin="0,0,16,0" />
+                    <Button Content="Сменить пароль" Command="{Binding ChangePasswordCommand}" Style="{StaticResource HeaderButton}" />
+                    <Button Content="Выйти" Command="{Binding LogoutCommand}" Style="{StaticResource HeaderButton}" Margin="8,0,0,0" />
+                </StackPanel>
+                <TextBlock Text="Мониторинг прогулов" Foreground="White" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
+
+        <!-- Меню -->
+        <Border DockPanel.Dock="Left" Width="220" Background="{StaticResource SidebarBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+            <ListBox ItemsSource="{Binding MenuItems}" SelectedItem="{Binding SelectedItem}"
+                     DisplayMemberPath="Title" Style="{StaticResource MenuList}" />
+        </Border>
+
+        <!-- Содержимое раздела: View подбирается по типу ViewModel через DataTemplate в App.xaml -->
+        <ContentControl Content="{Binding CurrentPage}" Margin="20" />
+    </DockPanel>
+</Window>

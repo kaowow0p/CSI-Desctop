@@ -1,0 +1,219 @@
+<!--
+    Представления справочников. Каждый раздел — DataTemplate для своей ViewModel:
+    слева таблица записей, справа форма редактирования выбранной (или новой) записи.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:Attendance.Desktop.ViewModels">
+
+    <!-- Группы -->
+    <DataTemplate DataType="{x:Type vm:GroupsViewModel}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="340" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Группы" Style="{DynamicResource TitleText}" Margin="0,0,0,12" />
+
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" AutomationProperties.Name="Список групп">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" />
+                    <DataGridTextColumn Header="Специальность" Binding="{Binding Specialty}" Width="*" />
+                    <DataGridTextColumn Header="Курс" Binding="{Binding Course}" />
+                    <DataGridTextColumn Header="Куратор" Binding="{Binding Curator.FullName}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Border Grid.Row="1" Grid.Column="1" Style="{DynamicResource FormPanel}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Карточка группы" Style="{DynamicResource SectionTitle}" />
+                        <TextBlock Text="Название" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.Name}" AutomationProperties.Name="Название" />
+                        <TextBlock Text="Специальность" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.Specialty}" TextWrapping="Wrap" AutomationProperties.Name="Специальность" />
+                        <TextBlock Text="Курс (1–6)" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.Course}" AutomationProperties.Name="Курс" />
+                        <TextBlock Text="Куратор" Style="{DynamicResource FieldLabel}" />
+                        <ComboBox ItemsSource="{Binding Curators}" DisplayMemberPath="Name" SelectedValuePath="Id"
+                                  SelectedValue="{Binding Edit.CuratorUserId}" AutomationProperties.Name="Куратор" />
+                        <TextBlock Text="{Binding ErrorMessage}" Style="{DynamicResource ErrorText}" />
+                        <ContentControl Template="{DynamicResource CrudButtons}" Focusable="False" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </DataTemplate>
+
+    <!-- Студенты -->
+    <DataTemplate DataType="{x:Type vm:StudentsViewModel}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="340" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Студенты" Style="{DynamicResource TitleText}" Margin="0,0,0,12" />
+
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" AutomationProperties.Name="Список студентов">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Группа" Binding="{Binding Group.Name}" />
+                    <DataGridTextColumn Header="ФИО" Binding="{Binding FullName}" Width="*" />
+                    <DataGridTextColumn Header="Зачётная книжка" Binding="{Binding RecordBookNumber}" />
+                    <DataGridTextColumn Header="Учётная запись" Binding="{Binding User.Login}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Border Grid.Row="1" Grid.Column="1" Style="{DynamicResource FormPanel}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Карточка студента" Style="{DynamicResource SectionTitle}" />
+                        <TextBlock Text="Фамилия" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.LastName}" AutomationProperties.Name="Фамилия" />
+                        <TextBlock Text="Имя" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.FirstName}" AutomationProperties.Name="Имя" />
+                        <TextBlock Text="Отчество" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.MiddleName}" AutomationProperties.Name="Отчество" />
+                        <TextBlock Text="Номер зачётной книжки" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.RecordBookNumber}" AutomationProperties.Name="Номер зачётной книжки" />
+                        <TextBlock Text="Группа" Style="{DynamicResource FieldLabel}" />
+                        <ComboBox ItemsSource="{Binding Groups}" DisplayMemberPath="Name" SelectedValuePath="Id"
+                                  SelectedValue="{Binding Edit.GroupId}" AutomationProperties.Name="Группа" />
+                        <TextBlock Text="Учётная запись (студент или староста)" Style="{DynamicResource FieldLabel}" />
+                        <ComboBox ItemsSource="{Binding Accounts}" DisplayMemberPath="Name" SelectedValuePath="Id"
+                                  SelectedValue="{Binding Edit.UserId}" AutomationProperties.Name="Учётная запись" />
+                        <TextBlock Text="{Binding ErrorMessage}" Style="{DynamicResource ErrorText}" />
+                        <ContentControl Template="{DynamicResource CrudButtons}" Focusable="False" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </DataTemplate>
+
+    <!-- Преподаватели -->
+    <DataTemplate DataType="{x:Type vm:TeachersViewModel}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="340" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Преподаватели" Style="{DynamicResource TitleText}" Margin="0,0,0,12" />
+
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" AutomationProperties.Name="Список преподавателей">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ФИО" Binding="{Binding FullName}" Width="*" />
+                    <DataGridTextColumn Header="Учётная запись" Binding="{Binding User.Login}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Border Grid.Row="1" Grid.Column="1" Style="{DynamicResource FormPanel}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Карточка преподавателя" Style="{DynamicResource SectionTitle}" />
+                        <TextBlock Text="Фамилия" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.LastName}" AutomationProperties.Name="Фамилия" />
+                        <TextBlock Text="Имя" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.FirstName}" AutomationProperties.Name="Имя" />
+                        <TextBlock Text="Отчество" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.MiddleName}" AutomationProperties.Name="Отчество" />
+                        <TextBlock Text="Учётная запись (преподаватель)" Style="{DynamicResource FieldLabel}" />
+                        <ComboBox ItemsSource="{Binding Accounts}" DisplayMemberPath="Name" SelectedValuePath="Id"
+                                  SelectedValue="{Binding Edit.UserId}" AutomationProperties.Name="Учётная запись" />
+                        <TextBlock Text="{Binding ErrorMessage}" Style="{DynamicResource ErrorText}" />
+                        <ContentControl Template="{DynamicResource CrudButtons}" Focusable="False" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </DataTemplate>
+
+    <!-- Дисциплины -->
+    <DataTemplate DataType="{x:Type vm:SubjectsViewModel}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="340" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Дисциплины" Style="{DynamicResource TitleText}" Margin="0,0,0,12" />
+
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" AutomationProperties.Name="Список дисциплин">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Border Grid.Row="1" Grid.Column="1" Style="{DynamicResource FormPanel}">
+                <StackPanel>
+                    <TextBlock Text="Дисциплина" Style="{DynamicResource SectionTitle}" />
+                    <TextBlock Text="Название" Style="{DynamicResource FieldLabel}" />
+                    <TextBox Text="{Binding Edit.Name}" TextWrapping="Wrap" AutomationProperties.Name="Название" />
+                    <TextBlock Text="{Binding ErrorMessage}" Style="{DynamicResource ErrorText}" />
+                    <ContentControl Template="{DynamicResource CrudButtons}" Focusable="False" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </DataTemplate>
+
+    <!-- Пользователи -->
+    <DataTemplate DataType="{x:Type vm:UsersViewModel}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="340" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Пользователи" Style="{DynamicResource TitleText}" Margin="0,0,0,12" />
+
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" AutomationProperties.Name="Список пользователей">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Логин" Binding="{Binding Login}" />
+                    <DataGridTextColumn Header="ФИО" Binding="{Binding FullName}" Width="*" />
+                    <DataGridTextColumn Header="Роль" Binding="{Binding Role.Name}" />
+                    <DataGridCheckBoxColumn Header="Заблокирован" Binding="{Binding IsLocked}" />
+                    <DataGridCheckBoxColumn Header="Сменить пароль" Binding="{Binding MustChangePassword}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Border Grid.Row="1" Grid.Column="1" Style="{DynamicResource FormPanel}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Учётная запись" Style="{DynamicResource SectionTitle}" />
+                        <TextBlock Text="Логин" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.Login}" AutomationProperties.Name="Логин" />
+                        <TextBlock Text="ФИО" Style="{DynamicResource FieldLabel}" />
+                        <TextBox Text="{Binding Edit.FullName}" AutomationProperties.Name="ФИО" />
+                        <TextBlock Text="Роль" Style="{DynamicResource FieldLabel}" />
+                        <ComboBox ItemsSource="{Binding Roles}" DisplayMemberPath="Name" SelectedValuePath="Id"
+                                  SelectedValue="{Binding Edit.RoleId}" AutomationProperties.Name="Роль" />
+                        <CheckBox Content="Заблокирован" IsChecked="{Binding Edit.IsLocked}" />
+                        <TextBlock Text="Временный пароль" Style="{DynamicResource FieldLabel}" Margin="0,12,0,4" />
+                        <TextBox Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Временный пароль" />
+                        <TextBlock Text="{Binding PasswordHint}" Style="{DynamicResource MutedText}" FontSize="12" Margin="0,4,0,0" />
+                        <TextBlock Text="Для существующего пользователя заполните, только чтобы сбросить пароль."
+                                   Style="{DynamicResource MutedText}" FontSize="12" />
+                        <TextBlock Text="{Binding ErrorMessage}" Style="{DynamicResource ErrorText}" />
+                        <ContentControl Template="{DynamicResource CrudButtons}" Focusable="False" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>
