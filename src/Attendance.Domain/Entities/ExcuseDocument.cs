@@ -1,6 +1,5 @@
 namespace Attendance.Domain.Entities;
 
-/// <summary>Оправдательный документ. Медицинские диагнозы намеренно не хранятся.</summary>
 public class ExcuseDocument
 {
     public int Id { get; set; }

@@ -5,7 +5,6 @@ public static class PasswordPolicy
     public const int MinLength = 8;
     public const string Description = "Не менее 8 символов, заглавные и строчные буквы, цифры.";
 
-    /// <summary>Возвращает текст ошибки или null, если пароль подходит.</summary>
     public static string? Validate(string? password)
     {
         if (string.IsNullOrEmpty(password) || password.Length < MinLength)

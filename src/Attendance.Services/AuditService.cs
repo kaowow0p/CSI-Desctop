@@ -5,20 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Attendance.Services;
 
-/// <summary>Просмотр журнала аудита (только администратор). Записи создают триггеры БД.</summary>
 public interface IAuditService
 {
-    /// <summary>Записи за период (по местным датам), новые сверху; <paramref name="tableName"/> = null — все таблицы.</summary>
     Task<IReadOnlyList<AuditLog>> GetAsync(DateOnly from, DateOnly to, string? tableName, CancellationToken ct = default);
 }
 
 public sealed class AuditService(IDbContextFactory<AttendanceDbContext> dbFactory, UserSession session) : IAuditService
 {
-    /// <summary>Таблицы, на которых висит триггер аудита (совпадает со списком в 04_audit.sql).</summary>
     public static readonly string[] AuditedTables =
         ["users", "groups", "students", "teachers", "subjects", "lessons", "absences", "excuse_documents"];
 
-    // shortcut: показываем не больше 1000 последних записей; если журнал разрастётся — добавить постраничный вывод.
     public const int MaxRows = 1000;
 
     public async Task<IReadOnlyList<AuditLog>> GetAsync(DateOnly from, DateOnly to, string? tableName, CancellationToken ct = default)

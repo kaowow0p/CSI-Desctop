@@ -1,6 +1,5 @@
 namespace Attendance.Domain;
 
-/// <summary>Роль пользователя. Значения совпадают с roles.id.</summary>
 public enum UserRole
 {
     Admin = 1,

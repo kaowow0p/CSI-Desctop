@@ -98,7 +98,7 @@ public sealed class AttendanceService(
             ?? throw new ServiceException("Пропуск не найден или относится не к вашей группе.");
 
         absence.Status = status;
-        absence.ExcuseDocumentId = null; // статус задан вручную, а не по документу
+        absence.ExcuseDocumentId = null;
         await db.SaveChangesOrThrowAsync(ct);
     }
 
@@ -119,7 +119,6 @@ public sealed class AttendanceService(
             .SingleOrDefaultAsync(l => l.Id == lessonId, ct)
         ?? throw new ServiceException("Занятие не найдено или недоступно.");
 
-    /// <summary>Правила отметки: преподаватель — только в день занятия, никто — на будущих занятиях.</summary>
     private string? EditDeniedReason(Lesson lesson)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
@@ -135,7 +134,6 @@ public sealed class AttendanceService(
         };
     }
 
-    /// <summary>Считает неуважительные часы за месяц занятия и уведомляет куратора о превышении порога.</summary>
     private async Task<IReadOnlyList<string>> CheckMonthlyLimitAsync(AttendanceDbContext db, Lesson lesson,
         IReadOnlyCollection<int> studentIds, CancellationToken ct)
     {
@@ -161,8 +159,6 @@ public sealed class AttendanceService(
             ? [curatorId]
             : await db.Users.Where(u => u.RoleId == UserRole.Admin).Select(u => u.Id).ToListAsync(ct);
 
-        // shortcut: повтор отсекается по дате создания уведомления (не раньше начала месяца занятия);
-        // если нужно точное «один раз за месяц пропусков», хранить месяц в отдельном столбце notifications.
         var since = monthStart.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var alreadyNotified = await db.Notifications
             .Where(n => n.StudentId != null && overIds.Contains(n.StudentId.Value) && n.CreatedAt >= since)

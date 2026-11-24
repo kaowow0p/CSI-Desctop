@@ -82,7 +82,6 @@ public partial class UsersViewModel(IUserService users, IDialogService dialogs) 
     [ObservableProperty]
     private IReadOnlyList<Role> _roles = [];
 
-    /// <summary>Временный пароль: обязателен для нового пользователя, для существующего — сброс пароля.</summary>
     [ObservableProperty]
     private string _newPassword = "";
 
@@ -104,7 +103,6 @@ public partial class UsersViewModel(IUserService users, IDialogService dialogs) 
         return id;
     }
 
-    // Пароль, введённый для одного пользователя, не должен применяться к другому.
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);

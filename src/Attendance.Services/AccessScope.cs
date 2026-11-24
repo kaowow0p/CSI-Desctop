@@ -4,10 +4,8 @@ using Attendance.Domain.Entities;
 
 namespace Attendance.Services;
 
-/// <summary>Какие данные видит текущий пользователь в зависимости от роли.</summary>
 internal static class AccessScope
 {
-    /// <summary>Занятия: администратор — все, куратор — своих групп, преподаватель — свои, староста — своей группы.</summary>
     public static IQueryable<Lesson> Lessons(AttendanceDbContext db, UserSession session) => session.Role switch
     {
         UserRole.Admin => db.Lessons,
@@ -17,7 +15,6 @@ internal static class AccessScope
         _ => db.Lessons.Where(_ => false)
     };
 
-    /// <summary>Группы: администратор — все, куратор — свои, преподаватель — где ведёт занятия, староста — своя.</summary>
     public static IQueryable<Group> Groups(AttendanceDbContext db, UserSession session) => session.Role switch
     {
         UserRole.Admin => db.Groups,
@@ -27,7 +24,6 @@ internal static class AccessScope
         _ => db.Groups.Where(_ => false)
     };
 
-    /// <summary>Студенты: администратор — все, куратор — своих групп, староста — своей группы, студент — только он сам.</summary>
     public static IQueryable<Student> Students(AttendanceDbContext db, UserSession session) => session.Role switch
     {
         UserRole.Admin => db.Students,

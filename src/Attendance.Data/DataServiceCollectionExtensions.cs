@@ -10,8 +10,6 @@ public static class DataServiceCollectionExtensions
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
-        // Фабрика контекстов: окна WPF живут долго, поэтому контекст создаётся на одну операцию.
-        // Перехватчики из DI (передача текущего пользователя в триггеры аудита) подключаются к каждому контексту.
         services.AddDbContextFactory<AttendanceDbContext>((sp, options) => options
             .UseNpgsql(connectionString)
             .UseSnakeCaseNamingConvention()

@@ -26,7 +26,6 @@ public partial class MainWindow : Window
         };
     }
 
-    /// <summary>Пользователь вышел из учётной записи (а не закрыл приложение).</summary>
     public event Action? LoggedOut;
 
     protected override void OnClosed(EventArgs e)

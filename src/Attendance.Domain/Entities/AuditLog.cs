@@ -1,6 +1,5 @@
 namespace Attendance.Domain.Entities;
 
-/// <summary>Запись журнала аудита. Заполняется триггерами БД, приложение только читает.</summary>
 public class AuditLog
 {
     public long Id { get; set; }

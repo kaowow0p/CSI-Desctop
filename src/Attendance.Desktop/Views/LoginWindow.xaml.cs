@@ -29,7 +29,6 @@ public partial class LoginWindow : Window
             dialog.Owner = this;
             if (dialog.ShowDialog() != true)
             {
-                // Без смены пароля работать нельзя — остаёмся на экране входа.
                 _viewModel.CancelLogin();
                 return;
             }

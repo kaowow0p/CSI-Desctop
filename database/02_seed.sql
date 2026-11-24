@@ -1,29 +1,9 @@
--- =====================================================================
--- ИС мониторинга прогулов учебной группы
--- 02_seed.sql — тестовые данные
---
--- Запуск (после 01_schema.sql или миграции EF):
---   psql -U postgres -d attendance -f 02_seed.sql
---
--- ВНИМАНИЕ: скрипт очищает все таблицы, кроме roles, и заполняет их заново.
--- Даты занятий считаются от current_date: прошлая и текущая учебная неделя (пн–пт),
--- поэтому у преподавателя всегда есть «сегодняшние» занятия для отметки.
---
--- Учётные записи (пароли — в README.md):
---   admin, curator, teacher, headman, student
--- =====================================================================
-
 BEGIN;
 
 TRUNCATE audit_log, notifications, absences, excuse_documents, lessons,
          students, teachers, subjects, groups, users
 RESTART IDENTITY;
 
--- ---------------------------------------------------------------------
--- Пользователи: по одному на каждую роль.
--- Хеши bcrypt (cost 11) сгенерированы библиотекой BCrypt.Net-Next.
--- Студенту оставлен флаг смены пароля, чтобы показать сценарий первого входа.
--- ---------------------------------------------------------------------
 INSERT INTO users (id, login, password_hash, full_name, role_id, must_change_password) VALUES
     (1, 'admin',   '$2a$11$3XkL.TRcZWLnaln/F08XLe9RrEVEHRKrOA8CVBfXDjEXEHHEvkliW', 'Администратор системы',      1, FALSE),
     (2, 'curator', '$2a$11$mJi.irN1q0vwn41XCqmHIutdDHZuHKsfojtxu7yOOKXpuutp0Jwt6', 'Михайлова Татьяна Сергеевна', 2, FALSE),
@@ -31,9 +11,6 @@ INSERT INTO users (id, login, password_hash, full_name, role_id, must_change_pas
     (4, 'headman', '$2a$11$KFh1N2.Us0B8oKY0HAiuHeOjE86NGx4pMrQ8ihPCh1/I5Ov5iXymO', 'Андреев Илья Сергеевич',      4, FALSE),
     (5, 'student', '$2a$11$.iCwxyZImIrFLD311EPEK.sNgolg4m4IpjC3Z99OwKRlA2phFJBHS', 'Белова Анна Дмитриевна',      5, TRUE);
 
--- ---------------------------------------------------------------------
--- Группа, преподаватели, дисциплины.
--- ---------------------------------------------------------------------
 INSERT INTO groups (id, name, specialty, course, curator_user_id) VALUES
     (1, 'ИС-21', '09.02.07 Информационные системы и программирование', 3, 2);
 
@@ -52,9 +29,6 @@ INSERT INTO subjects (id, name) VALUES
     (5, 'Элементы высшей математики'),
     (6, 'Физическая культура');
 
--- ---------------------------------------------------------------------
--- Студенты. №1 — староста (headman), №2 — студент с учётной записью (student).
--- ---------------------------------------------------------------------
 INSERT INTO students (id, group_id, last_name, first_name, middle_name, record_book_number, user_id) VALUES
     ( 1, 1, 'Андреев',   'Илья',      'Сергеевич',    '21-001', 4),
     ( 2, 1, 'Белова',    'Анна',      'Дмитриевна',   '21-002', 5),
@@ -77,35 +51,20 @@ INSERT INTO students (id, group_id, last_name, first_name, middle_name, record_b
     (19, 1, 'Никитин',   'Арсений',   'Павлович',     '21-019', NULL),
     (20, 1, 'Зайцева',   'Ульяна',    'Денисовна',    '21-020', NULL);
 
--- ---------------------------------------------------------------------
--- Расписание на 2 недели: шаблон недели (день недели, пара, дисциплина, преподаватель)
--- разворачивается на прошлую и текущую неделю.
--- ---------------------------------------------------------------------
 INSERT INTO lessons (date, pair_number, subject_id, teacher_id, group_id, hours)
 SELECT d::date, t.pair, t.subject_id, t.teacher_id, 1, 2
 FROM generate_series(date_trunc('week', current_date) - interval '7 days',
                      date_trunc('week', current_date) + interval '6 days',
                      interval '1 day') AS d
 JOIN (VALUES
-    -- пн
     (1, 1, 1, 1), (1, 2, 5, 4), (1, 3, 4, 3),
-    -- вт
     (2, 1, 2, 1), (2, 2, 3, 2), (2, 3, 6, 5),
-    -- ср
     (3, 1, 1, 1), (3, 2, 2, 1), (3, 3, 5, 4),
-    -- чт
     (4, 1, 3, 2), (4, 2, 4, 3), (4, 3, 1, 1),
-    -- пт
     (5, 1, 2, 1), (5, 2, 3, 2), (5, 3, 6, 5)
 ) AS t(weekday, pair, subject_id, teacher_id) ON t.weekday = extract(isodow FROM d)
 ORDER BY d, t.pair;
 
--- ---------------------------------------------------------------------
--- Оправдательные документы (дни считаются от понедельника прошлой недели).
---   1 — справка Новиковой на вт–ср, подтверждена куратором;
---   2 — справка Павлова на чт, ожидает проверки (для демонстрации подтверждения);
---   3 — заявление Соколовой на пт, отклонено.
--- ---------------------------------------------------------------------
 INSERT INTO excuse_documents (id, student_id, type, number, issue_date, valid_from, valid_to, status,
                               registered_by_user_id, registered_at, reviewed_by_user_id, reviewed_at, review_comment)
 SELECT v.id, v.student_id, v.type, v.number, w.mon + v.issue_off, w.mon + v.from_off, w.mon + v.to_off, v.status,
@@ -120,10 +79,6 @@ CROSS JOIN (VALUES
     (3, 12, 'Statement',          'З-17',     4, 4, 4, 'Rejected', 'Заявление подано после пропуска без согласования')
 ) AS v(id, student_id, type, number, issue_off, from_off, to_off, status, comment);
 
--- ---------------------------------------------------------------------
--- Пропуски (только по прошедшим занятиям).
--- Отмечает преподаватель-пользователь на своих парах, на остальных — староста.
--- ---------------------------------------------------------------------
 INSERT INTO absences (student_id, lesson_id, status, marked_by_user_id, marked_at, excuse_document_id)
 SELECT a.student_id, l.id, a.status,
        CASE WHEN l.teacher_id = 1 THEN 3 ELSE 4 END,
@@ -131,33 +86,24 @@ SELECT a.student_id, l.id, a.status,
        a.document_id
 FROM lessons AS l
 CROSS JOIN LATERAL (
-    -- Козлов систематически пропускает 1-ю и 3-ю пары — превысит лимит
     SELECT 5 AS student_id, 'Unexcused' AS status, NULL::integer AS document_id
     WHERE l.pair_number IN (1, 3)
     UNION ALL
-    -- Новикова болела вт–ср прошлой недели (справка подтверждена)
     SELECT 7, 'Excused', 1
     FROM excuse_documents AS e WHERE e.id = 1 AND l.date BETWEEN e.valid_from AND e.valid_to
     UNION ALL
-    -- Павлов отсутствовал в чт прошлой недели (справка на проверке)
     SELECT 9, 'Unexcused', NULL
     FROM excuse_documents AS e WHERE e.id = 2 AND l.date BETWEEN e.valid_from AND e.valid_to
     UNION ALL
-    -- Соколова ушла с последней пары в пт прошлой недели (заявление отклонено)
     SELECT 12, 'Unexcused', NULL
     FROM excuse_documents AS e WHERE e.id = 3 AND l.date = e.valid_from AND l.pair_number = 3
     UNION ALL
-    -- Единичные пропуски остальных студентов (детерминированно, без random)
     SELECT s.id, 'Unexcused', NULL
     FROM students AS s
     WHERE s.id NOT IN (5, 7, 9, 12) AND (s.id * 3 + l.id) % 17 = 0
 ) AS a
 WHERE l.date < current_date;
 
--- ---------------------------------------------------------------------
--- Уведомление куратору: неуважительные пропуски за текущий месяц выше порога 12 ч.
--- (В приложении такие уведомления создаёт сервис после сохранения отметок.)
--- ---------------------------------------------------------------------
 INSERT INTO notifications (user_id, student_id, message, created_at)
 SELECT g.curator_user_id, s.id,
        format('Студент %s %s (%s): %s ч неуважительных пропусков за %s — превышен порог 12 ч.',
@@ -172,9 +118,6 @@ WHERE a.status = 'Unexcused'
 GROUP BY s.id, s.last_name, s.first_name, g.name, g.curator_user_id
 HAVING sum(l.hours) > 12;
 
--- ---------------------------------------------------------------------
--- Сдвигаем счётчики identity после вставки явных id.
--- ---------------------------------------------------------------------
 SELECT setval(pg_get_serial_sequence('users', 'id'),            (SELECT max(id) FROM users));
 SELECT setval(pg_get_serial_sequence('groups', 'id'),           (SELECT max(id) FROM groups));
 SELECT setval(pg_get_serial_sequence('teachers', 'id'),         (SELECT max(id) FROM teachers));
@@ -182,7 +125,6 @@ SELECT setval(pg_get_serial_sequence('subjects', 'id'),         (SELECT max(id) 
 SELECT setval(pg_get_serial_sequence('students', 'id'),         (SELECT max(id) FROM students));
 SELECT setval(pg_get_serial_sequence('excuse_documents', 'id'), (SELECT max(id) FROM excuse_documents));
 
--- Если триггеры аудита уже установлены (04_audit.sql), загрузка тестовых данных не должна попадать в журнал.
 TRUNCATE audit_log RESTART IDENTITY;
 
 COMMIT;

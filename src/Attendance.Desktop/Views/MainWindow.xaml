@@ -5,7 +5,6 @@
         Title="Мониторинг прогулов учебной группы" Height="680" Width="1100" MinHeight="480" MinWidth="800"
         WindowStartupLocation="CenterScreen">
     <DockPanel>
-        <!-- Шапка -->
         <Border DockPanel.Dock="Top" Background="{StaticResource AccentBrush}" Padding="16,10">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
@@ -17,14 +16,12 @@
             </DockPanel>
         </Border>
 
-        <!-- Меню -->
         <Border DockPanel.Dock="Left" Width="220" Background="{StaticResource SidebarBrush}"
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
             <ListBox ItemsSource="{Binding MenuItems}" SelectedItem="{Binding SelectedItem}"
                      DisplayMemberPath="Title" Style="{StaticResource MenuList}" />
         </Border>
 
-        <!-- Содержимое раздела: View подбирается по типу ViewModel через DataTemplate в App.xaml -->
         <ContentControl Content="{Binding CurrentPage}" Margin="20" />
     </DockPanel>
 </Window>

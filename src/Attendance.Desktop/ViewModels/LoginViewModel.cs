@@ -12,7 +12,6 @@ public partial class LoginViewModel(IAuthService auth, UserSession session) : Ob
     [ObservableProperty]
     private string _errorMessage = "";
 
-    // PasswordBox не поддерживает привязку, значение передаётся из code-behind.
     public string Password { private get; set; } = "";
 
     public bool MustChangePassword => session.MustChangePassword;

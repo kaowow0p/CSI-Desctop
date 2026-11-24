@@ -5,22 +5,16 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Attendance.Desktop.ViewModels;
 
-/// <summary>Раздел, который загружает данные при открытии.</summary>
 public interface IPageViewModel
 {
     IAsyncRelayCommand LoadCommand { get; }
 }
 
-/// <summary>Элемент выпадающего списка, допускающего «пустое» значение.</summary>
 public sealed record LookupItem(int? Id, string Name)
 {
     public static LookupItem None { get; } = new(null, "— не выбрано —");
 }
 
-/// <summary>
-/// Общая логика страниц справочников: список слева, форма редактирования справа.
-/// Форма редактирует копию выбранной записи, поэтому несохранённые изменения не попадают в список.
-/// </summary>
 public abstract partial class CrudViewModel<T>(IDialogService dialogs) : ObservableObject, IPageViewModel where T : class, new()
 {
     private static readonly MethodInfo CloneMethod =

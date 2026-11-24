@@ -7,7 +7,6 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Attendance.Desktop.ViewModels;
 
-/// <summary>Строка шаблона недели для отображения.</summary>
 public sealed record TemplateRow(DayOfWeek Day, short PairNumber, int SubjectId, string SubjectName, int TeacherId, string TeacherName, short Hours)
 {
     public string DayName => ScheduleViewModel.DayName(Day);
@@ -18,7 +17,6 @@ public partial class ScheduleViewModel(IScheduleService schedule, IDirectoryServ
 {
     private static readonly DateTime ThisMonday = DateTime.Today.AddDays(-(((int)DateTime.Today.DayOfWeek + 6) % 7));
 
-    // Учебные дни: понедельник–суббота.
     public static IReadOnlyList<LookupItem> Days { get; } =
         Enumerable.Range(1, 6).Select(d => new LookupItem(d, DayName((DayOfWeek)d))).ToList();
 
@@ -26,12 +24,10 @@ public partial class ScheduleViewModel(IScheduleService schedule, IDirectoryServ
     [ObservableProperty] private IReadOnlyList<Subject> _subjects = [];
     [ObservableProperty] private IReadOnlyList<Teacher> _teachers = [];
 
-    // Фильтр просмотра
     [ObservableProperty] private int _groupId;
     [ObservableProperty] private DateTime _from = ThisMonday;
     [ObservableProperty] private DateTime _to = ThisMonday.AddDays(13);
 
-    // Шаблон недели
     public ObservableCollection<TemplateRow> TemplateRows { get; } = [];
     [ObservableProperty] private int? _templateDay = 1;
     [ObservableProperty] private short _templatePair = 1;

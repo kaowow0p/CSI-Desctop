@@ -7,16 +7,13 @@ using static Attendance.Domain.UserRole;
 
 namespace Attendance.Desktop.ViewModels;
 
-/// <summary>Пункт меню: доступен перечисленным ролям, создаёт ViewModel раздела.</summary>
 public sealed record MenuEntry(string Title, UserRole[] Roles, Func<IServiceProvider, object> CreatePage)
 {
-    // Используется экранными дикторами как имя пункта.
     public override string ToString() => Title;
 }
 
 public partial class MainViewModel : ObservableObject
 {
-    // Права дополнительно проверяются в сервисах — меню лишь скрывает недоступное.
     private static readonly MenuEntry[] Menu =
     [
         new("Журнал посещаемости", [Admin, Curator, Teacher, Headman], Open<JournalViewModel>),

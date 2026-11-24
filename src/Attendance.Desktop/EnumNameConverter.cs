@@ -4,7 +4,6 @@ using Attendance.Domain;
 
 namespace Attendance.Desktop;
 
-/// <summary>Русские названия статусов и типов, которые в БД хранятся английскими кодами.</summary>
 public sealed class EnumNameConverter : IValueConverter
 {
     public static string Name(object? value) => value switch

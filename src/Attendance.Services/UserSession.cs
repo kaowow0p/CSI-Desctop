@@ -3,7 +3,6 @@ using Attendance.Domain.Entities;
 
 namespace Attendance.Services;
 
-/// <summary>Текущий вошедший пользователь (один на экземпляр приложения).</summary>
 public sealed class UserSession
 {
     public int UserId { get; private set; }
@@ -15,10 +14,8 @@ public sealed class UserSession
 
     public bool IsAuthenticated => UserId != 0;
 
-    /// <summary>Сотрудники колледжа (все роли, кроме студента).</summary>
     public static readonly UserRole[] Staff = [UserRole.Admin, UserRole.Curator, UserRole.Teacher, UserRole.Headman];
 
-    /// <summary>Проверка прав: пользователь вошёл и имеет одну из указанных ролей.</summary>
     public void Demand(params UserRole[] roles)
     {
         if (!IsAuthenticated)

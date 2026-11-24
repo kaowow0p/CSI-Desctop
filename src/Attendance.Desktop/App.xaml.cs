@@ -16,7 +16,6 @@ public partial class App : Application
 {
     private readonly IHost _host = CreateHostBuilder([]).Build();
 
-    // Этот метод также находят инструменты EF Core (dotnet ef) при работе с миграциями.
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
             .UseContentRoot(AppContext.BaseDirectory)
@@ -47,8 +46,6 @@ public partial class App : Application
 
     public App()
     {
-        // Даты и дни недели — по-русски независимо от настроек Windows.
-        // Задаётся здесь, а не в async OnStartup: изменение культуры внутри async-метода не сохраняется после await.
         var culture = CultureInfo.GetCultureInfo("ru-RU");
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = culture;
         CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = culture;
@@ -70,7 +67,6 @@ public partial class App : Application
         base.OnExit(e);
     }
 
-    /// <summary>Окно входа; после успешного входа — главное окно. Вызывается повторно при выходе из учётной записи.</summary>
     private void ShowLogin()
     {
         var login = _host.Services.GetRequiredService<LoginWindow>();
@@ -86,7 +82,6 @@ public partial class App : Application
         main.Show();
     }
 
-    // Неожиданные ошибки (например, недоступен сервер БД) показываем пользователю вместо аварийного завершения.
     private static void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         MessageBox.Show(e.Exception.GetBaseException().Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);

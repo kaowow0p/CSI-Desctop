@@ -15,10 +15,10 @@ internal static class DbHelpers
         ["ix_teachers_user_id"] = "Эта учётная запись уже привязана к другому преподавателю.",
         ["ix_subjects_name"] = "Дисциплина с таким названием уже существует.",
         ["ix_lessons_group_id_date_pair_number"] = "У группы уже есть занятие на этой паре в этот день.",
+        ["uq_lessons_teacher_date_pair"] = "У преподавателя уже есть занятие на этой паре в этот день.",
         ["ix_absences_student_id_lesson_id"] = "Пропуск этого студента на занятии уже отмечен.",
     };
 
-    /// <summary>SaveChanges с переводом ошибок PostgreSQL в понятные пользователю сообщения.</summary>
     public static async Task SaveChangesOrThrowAsync(this AttendanceDbContext db, CancellationToken ct = default)
     {
         var deleting = db.ChangeTracker.Entries().Any(e => e.State == EntityState.Deleted);
@@ -42,7 +42,6 @@ internal static class DbHelpers
         }
     }
 
-    /// <summary>Новая сущность (id = 0) или существующая из БД.</summary>
     public static async Task<T> FindOrAddAsync<T>(this DbSet<T> set, int id, CancellationToken ct) where T : class, new() =>
         id == 0 ? set.Add(new T()).Entity : await set.FindExistingAsync(id, ct);
 

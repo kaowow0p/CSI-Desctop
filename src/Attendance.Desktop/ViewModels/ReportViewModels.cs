@@ -7,7 +7,6 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Attendance.Desktop.ViewModels;
 
-/// <summary>Отчёт: сводка пропусков группы за период с выгрузкой в Excel.</summary>
 public partial class ReportsViewModel(IReportService reports, IDialogService dialogs) : ObservableObject, IPageViewModel
 {
     [ObservableProperty] private IReadOnlyList<Group> _groups = [];
@@ -74,7 +73,6 @@ public partial class ReportsViewModel(IReportService reports, IDialogService dia
     private bool CanExport() => Report is not null;
 }
 
-/// <summary>Журнал аудита: кто, когда и что изменил (только администратор).</summary>
 public partial class AuditViewModel(IAuditService audit) : ObservableObject, IPageViewModel
 {
     private static readonly JsonSerializerOptions PrettyJson =

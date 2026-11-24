@@ -33,7 +33,6 @@ public sealed class UserService(IDbContextFactory<AttendanceDbContext> dbFactory
             throw new ServiceException("Для нового пользователя задайте временный пароль.");
         if (!string.IsNullOrEmpty(newPassword) && PasswordPolicy.Validate(newPassword) is { } passwordError)
             throw new ServiceException(passwordError);
-        // Защита от потери доступа: администратор не может разжаловать или заблокировать сам себя.
         if (input.Id == session.UserId && (input.RoleId != UserRole.Admin || input.IsLocked))
             throw new ServiceException("Нельзя снять с себя роль администратора или заблокировать свою учётную запись.");
 

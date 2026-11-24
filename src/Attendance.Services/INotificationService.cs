@@ -2,7 +2,6 @@ using Attendance.Domain.Entities;
 
 namespace Attendance.Services;
 
-/// <summary>Уведомления текущего пользователя.</summary>
 public interface INotificationService
 {
     Task<IReadOnlyList<Notification>> GetMyAsync(CancellationToken ct = default);

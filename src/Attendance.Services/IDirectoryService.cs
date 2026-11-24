@@ -2,7 +2,6 @@ using Attendance.Domain.Entities;
 
 namespace Attendance.Services;
 
-/// <summary>Справочники: группы, студенты, преподаватели, дисциплины. Изменять может только администратор.</summary>
 public interface IDirectoryService
 {
     Task<IReadOnlyList<Group>> GetGroupsAsync(CancellationToken ct = default);

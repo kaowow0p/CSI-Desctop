@@ -14,13 +14,10 @@ public sealed record AbsenceReport(string GroupName, DateOnly From, DateOnly To,
     public int UnexcusedHours => Rows.Sum(r => r.UnexcusedHours);
 }
 
-/// <summary>Отчёты о посещаемости. Учитываются только занятия, доступные пользователю (преподаватель — свои).</summary>
 public interface IReportService
 {
-    /// <summary>Группы, по которым пользователь может строить отчёт.</summary>
     Task<IReadOnlyList<Group>> GetGroupsAsync(CancellationToken ct = default);
 
-    /// <summary>Сводка пропусков по студентам группы за период; сверху — больше всего неуважительных часов.</summary>
     Task<AbsenceReport> GetAbsenceSummaryAsync(int groupId, DateOnly from, DateOnly to, CancellationToken ct = default);
 
     void ExportToExcel(AbsenceReport report, string path);

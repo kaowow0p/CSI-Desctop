@@ -26,6 +26,8 @@
 | `database/02_seed.sql` | тестовые данные |
 | `database/03_roles.sql` | роли PostgreSQL и права доступа |
 | `database/04_audit.sql` | триггеры журнала аудита |
+| `database/05_changes.sql` | изменения структуры: аудитория занятия, телефон студента, новые ограничения |
+| `database/06_procedures.sql` | процедуры добавления столбца и изменения ограничения уникальности |
 | `database/backup.ps1`, `restore.ps1` | резервное копирование и восстановление |
 
 ## Быстрый старт
@@ -53,10 +55,12 @@
    psql -U postgres -d attendance -f database/02_seed.sql
    psql -U postgres -d attendance -f database/03_roles.sql
    psql -U postgres -d attendance -f database/04_audit.sql
+   psql -U postgres -d attendance -f database/05_changes.sql
+   psql -U postgres -d attendance -f database/06_procedures.sql
    ```
    Через Docker (PowerShell):
    ```powershell
-   foreach ($f in '02_seed.sql', '03_roles.sql', '04_audit.sql') {
+   foreach ($f in '02_seed.sql', '03_roles.sql', '04_audit.sql', '05_changes.sql', '06_procedures.sql') {
        docker cp database/$f attendance-db:/tmp/$f
        docker exec attendance-db psql -U postgres -d attendance -v ON_ERROR_STOP=1 -f /tmp/$f
    }

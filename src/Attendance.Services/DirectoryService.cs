@@ -8,8 +8,6 @@ namespace Attendance.Services;
 
 public sealed class DirectoryService(IDbContextFactory<AttendanceDbContext> dbFactory, UserSession session) : IDirectoryService
 {
-    // ---------- Группы ----------
-
     public async Task<IReadOnlyList<Group>> GetGroupsAsync(CancellationToken ct = default)
     {
         session.Demand(UserSession.Staff);
@@ -44,8 +42,6 @@ public sealed class DirectoryService(IDbContextFactory<AttendanceDbContext> dbFa
         db.Groups.Remove(await db.Groups.FindExistingAsync(id, ct));
         await db.SaveChangesOrThrowAsync(ct);
     }
-
-    // ---------- Студенты ----------
 
     public async Task<IReadOnlyList<Student>> GetStudentsAsync(int? groupId = null, CancellationToken ct = default)
     {
@@ -90,8 +86,6 @@ public sealed class DirectoryService(IDbContextFactory<AttendanceDbContext> dbFa
         await db.SaveChangesOrThrowAsync(ct);
     }
 
-    // ---------- Преподаватели ----------
-
     public async Task<IReadOnlyList<Teacher>> GetTeachersAsync(CancellationToken ct = default)
     {
         session.Demand(UserSession.Staff);
@@ -128,8 +122,6 @@ public sealed class DirectoryService(IDbContextFactory<AttendanceDbContext> dbFa
         await db.SaveChangesOrThrowAsync(ct);
     }
 
-    // ---------- Дисциплины ----------
-
     public async Task<IReadOnlyList<Subject>> GetSubjectsAsync(CancellationToken ct = default)
     {
         session.Demand(UserSession.Staff);
@@ -157,7 +149,6 @@ public sealed class DirectoryService(IDbContextFactory<AttendanceDbContext> dbFa
         await db.SaveChangesOrThrowAsync(ct);
     }
 
-    /// <summary>Привязываемая учётная запись должна иметь подходящую роль.</summary>
     private static async Task EnsureUserRoleAsync(AttendanceDbContext db, int? userId, string error, CancellationToken ct,
         params UserRole[] roles)
     {

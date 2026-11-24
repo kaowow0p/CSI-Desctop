@@ -15,7 +15,6 @@ public class LessonConfiguration : IEntityTypeConfiguration<Lesson>
         });
 
         b.Property(x => x.Hours).HasDefaultValue((short)2);
-        // У группы не может быть двух занятий на одной паре в один день.
         b.HasIndex(x => new { x.GroupId, x.Date, x.PairNumber }).IsUnique();
         b.HasIndex(x => new { x.TeacherId, x.Date });
         b.HasIndex(x => x.SubjectId);

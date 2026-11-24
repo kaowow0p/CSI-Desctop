@@ -3,10 +3,6 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Attendance.Services;
 
-/// <summary>
-/// При каждом открытии подключения записывает id вошедшего пользователя в настройку сеанса PostgreSQL app.user_id.
-/// Её читают триггеры аудита (database/04_audit.sql), чтобы знать, кто изменил данные.
-/// </summary>
 internal sealed class AuditUserInterceptor(UserSession session) : DbConnectionInterceptor
 {
     public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
@@ -28,7 +24,7 @@ internal sealed class AuditUserInterceptor(UserSession session) : DbConnectionIn
         command.CommandText = "SELECT set_config('app.user_id', @user_id, false)";
         var parameter = command.CreateParameter();
         parameter.ParameterName = "user_id";
-        parameter.Value = session.IsAuthenticated ? session.UserId.ToString() : ""; // до входа — пустая строка, в журнале NULL
+        parameter.Value = session.IsAuthenticated ? session.UserId.ToString() : "";
         command.Parameters.Add(parameter);
         return command;
     }

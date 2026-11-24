@@ -6,10 +6,8 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Attendance.Desktop.ViewModels;
 
-/// <summary>Значение для выпадающего списка с русским названием.</summary>
 public sealed record Option<T>(T Value, string Name);
 
-/// <summary>Строка ведомости: галочка «отсутствовал» редактируется до сохранения.</summary>
 public partial class AttendanceRowViewModel(AttendanceRow row, bool canChangeStatus) : ObservableObject
 {
     public int StudentId => row.StudentId;
@@ -22,7 +20,6 @@ public partial class AttendanceRowViewModel(AttendanceRow row, bool canChangeSta
     private bool _isAbsent = row.AbsenceId is not null;
 }
 
-/// <summary>Журнал посещаемости: занятия за период → ведомость выбранного занятия.</summary>
 public partial class JournalViewModel(IAttendanceService attendance) : ObservableObject, IPageViewModel
 {
     [ObservableProperty] private DateTime _from = DateTime.Today.AddDays(-14);
@@ -65,7 +62,7 @@ public partial class JournalViewModel(IAttendanceService attendance) : Observabl
 
         var sheet = await attendance.GetSheetAsync(lesson.Id);
         if (SelectedLesson?.Id != lesson.Id)
-            return; // пользователь уже выбрал другое занятие
+            return;
 
         Rows = sheet.Rows.Select(r => new AttendanceRowViewModel(r, sheet.CanChangeStatus)).ToList();
         CanEdit = sheet.CanEdit;
@@ -114,7 +111,6 @@ public partial class JournalViewModel(IAttendanceService attendance) : Observabl
     }
 }
 
-/// <summary>Оправдательные документы: регистрация (староста) и проверка (куратор).</summary>
 public partial class ExcusesViewModel(IExcuseService excuses, UserSession session, IDialogService dialogs) : ObservableObject, IPageViewModel
 {
     public static IReadOnlyList<Option<DocumentType>> Types { get; } =
@@ -194,7 +190,6 @@ public partial class ExcusesViewModel(IExcuseService excuses, UserSession sessio
         })
         : Task.CompletedTask;
 
-    /// <summary>Выполняет действие, показывает результат или ошибку и обновляет список.</summary>
     private async Task RunAsync(Func<Task<string>> action)
     {
         Message = ErrorMessage = "";
@@ -211,7 +206,6 @@ public partial class ExcusesViewModel(IExcuseService excuses, UserSession sessio
     }
 }
 
-/// <summary>Пропуски текущего студента (только чтение).</summary>
 public partial class MyAbsencesViewModel(IAttendanceService attendance) : ObservableObject, IPageViewModel
 {
     [ObservableProperty] private IReadOnlyList<AbsenceInfo> _items = [];
@@ -227,7 +221,6 @@ public partial class MyAbsencesViewModel(IAttendanceService attendance) : Observ
     }
 }
 
-/// <summary>Уведомления текущего пользователя.</summary>
 public partial class NotificationsViewModel(INotificationService notifications) : ObservableObject, IPageViewModel
 {
     [ObservableProperty] private IReadOnlyList<Notification> _items = [];

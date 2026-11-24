@@ -15,7 +15,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         b.Property(x => x.FullName).HasMaxLength(150);
         b.Property(x => x.FailedLoginCount).HasDefaultValue(0);
         b.Property(x => x.IsLocked).HasDefaultValue(false);
-        // Sentinel = true: EF не отправляет значение по умолчанию, а явное false сохраняет.
         b.Property(x => x.MustChangePassword).HasDefaultValue(true).HasSentinel(true);
         b.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
         b.HasIndex(x => x.Login).IsUnique();

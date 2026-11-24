@@ -1,17 +1,14 @@
-﻿<!-- Расписание: просмотр/правка занятий группы за период и генерация занятий по шаблону недели. -->
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:Attendance.Desktop.ViewModels"
                     xmlns:local="clr-namespace:Attendance.Desktop">
 
-    <!-- Стили берутся из App.xaml через DynamicResource: StaticResource из отдельного словаря их не видит. -->
     <local:DateOnlyConverter x:Key="DateOnly" />
 
     <DataTemplate DataType="{x:Type vm:ScheduleViewModel}">
         <DockPanel>
             <TextBlock DockPanel.Dock="Top" Text="Расписание" Style="{DynamicResource TitleText}" Margin="0,0,0,12" />
 
-            <!-- Фильтр: группа и период -->
             <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
                 <TextBlock Text="Группа" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <ComboBox ItemsSource="{Binding Groups}" DisplayMemberPath="Name" SelectedValuePath="Id"
@@ -24,7 +21,6 @@
             </WrapPanel>
 
             <TabControl>
-                <!-- Занятия за период -->
                 <TabItem Header="Занятия">
                     <Grid Margin="0,12,0,0">
                         <Grid.ColumnDefinitions>
@@ -66,7 +62,6 @@
                     </Grid>
                 </TabItem>
 
-                <!-- Генерация по шаблону недели -->
                 <TabItem Header="Генерация по шаблону">
                     <Grid Margin="0,12,0,0">
                         <Grid.ColumnDefinitions>
@@ -78,7 +73,6 @@
                             <TextBlock DockPanel.Dock="Top" Style="{DynamicResource MutedText}" Margin="0,0,0,8"
                                        Text="Шаблон недели повторяется каждую неделю периода. Заполните его вручную или возьмите первую неделю из показанного расписания." />
 
-                            <!-- Добавление строки шаблона -->
                             <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <ComboBox ItemsSource="{x:Static vm:ScheduleViewModel.Days}" DisplayMemberPath="Name" SelectedValuePath="Id"
                                           SelectedValue="{Binding TemplateDay}" Width="130" Margin="0,0,8,8" AutomationProperties.Name="День недели" />

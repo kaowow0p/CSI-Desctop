@@ -12,7 +12,6 @@ public class Absence
     public User? MarkedBy { get; set; }
     public DateTime MarkedAt { get; set; }
 
-    /// <summary>Документ, по которому пропуск признан уважительным.</summary>
     public int? ExcuseDocumentId { get; set; }
     public ExcuseDocument? ExcuseDocument { get; set; }
 }

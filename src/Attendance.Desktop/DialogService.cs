@@ -2,13 +2,11 @@ using System.Windows;
 
 namespace Attendance.Desktop;
 
-/// <summary>Диалоги для ViewModel, чтобы они не обращались к MessageBox напрямую.</summary>
 public interface IDialogService
 {
     bool Confirm(string message);
     void Info(string message);
 
-    /// <summary>Окно «Сохранить как»; null — пользователь отменил.</summary>
     string? SaveFile(string defaultName, string filter);
 }
 
